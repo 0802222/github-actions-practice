@@ -1,14 +1,27 @@
+# workflow 의 이름
 name : Github Actions 실행시켜보기 (jscode)
 
+# event : 실행 되는 시점을 설정
 on :
   push :
     branches :
       - main
 
+# 1개의 workflow 는 1개 이상의 Job 으로 구성 된다.
+# 여러 Job 은 기본적으로 병렬 수행 된다.
 jobs :
+  # Job 을 식별하기 위한 id
   My-Deploy-Job:
+    # 로직을 실행 시킬수 있는 컴퓨터
     runs-on: ubuntu-latest
 
+    # 특정 작업을 수행하는 가장 작은 단위
+    # Job 은 여러 step 으로 구성되어 있다.
     steps:
       - name : Hello World 찍기
         run : echo "Hello World"
+
+      - name : 여러 명령어 문장 작성하기
+        run : |
+          echo "Good"
+          echo "Morning"
