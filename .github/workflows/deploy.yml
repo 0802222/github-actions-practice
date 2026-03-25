@@ -1,5 +1,5 @@
 # workflow 의 이름
-name : Github Actions 실행시켜보기 (jscode)
+name : Deploy To EC2
 
 # event : 실행 되는 시점을 설정
 on :
@@ -11,27 +11,23 @@ on :
 # 여러 Job 은 기본적으로 병렬 수행 된다.
 jobs :
   # Job 을 식별하기 위한 id
-  My-Deploy-Job:
+  Deploy:
     # 로직을 실행 시킬수 있는 컴퓨터
     runs-on: ubuntu-latest
 
     # 특정 작업을 수행하는 가장 작은 단위
     # Job 은 여러 step 으로 구성되어 있다.
     steps:
-      - name : Hello World 찍기
-        run : echo "Hello World"
-
-      - name : 여러 명령어 문장 작성하기
-        run : |
-          echo "Good"
-          echo "Morning"
-
-      - name : GitHub Actions 자체에 저장되어 있는 변수 사용해보기
-        run : |
-          echo $GITHUB_SHA
-          echo $GITHUB_REPOSITORY
-
-      - name : 노출되면 안되는 값 테스트
-        run : |
-          echo ${{ secrets.MY_NAME }}
-          echo ${{ secrets.MY_HOBBY }}
+      - name: SSH(원격 접속)로 EC2 에 접속하기
+        uses: appleboy/ssh-action@v.1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            cd /home/ubuntu/github-actions
+            git pull origin main
+            ./gradlew clean build
+            sudo fuser -k -n tcp 8080 || true
+            nohup java -jar build/libs/*SNAPSHOT.jar > ./output.log 2>&1 &
